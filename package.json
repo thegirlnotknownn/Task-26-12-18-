@@ -1,17 +1,18 @@
 {
-  "name": "Task261226",
+  "name": "videobroadcast",
   "version": "1.0.0",
-  "description": "on it",
-  "main": "app.js",
+  "description": "huhuhuhuhu",
+  "main": "broadcast.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
   },
-  "author": "Amishaa",
+  "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.4",
-    "mongodb": "^2.2.30",
-    "socket.io": "^2.0.3"
+    "mongodb": "^2.2.33",
+    "socket.io": "^2.2.0"
   },
   "devDependencies": {
     "nodemon": "^1.18.9"

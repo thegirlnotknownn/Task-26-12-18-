@@ -1,268 +1,100 @@
-<html>
-	<head>
-		<title>TASK</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-        <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
-		<!-- <script src="./b.js"></script> -->
-        <script src="/socket.io/socket.io.js"></script>
-        <style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset:UTF-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <title>Video Broadcast</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        document.createElement('article');
+    </script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io();
+    </script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    
+     <!-- This Library is used to detect WebRTC features -->
+     <script src="https://cdn.webrtc-experiment.com/DetectRTC.js"></script>
+
+     <script src="https://cdn.webrtc-experiment.com/socket.io.js"> </script>
+     <script src="https://cdn.webrtc-experiment.com/IceServersHandler.js"></script>
+     <script src="https://cdn.webrtc-experiment.com/CodecsHandler.js"></script>
+     <script src="https://cdn.webrtc-experiment.com/RTCPeerConnection-v1.5.js"> </script>
+     <script src="https://cdn.webrtc-experiment.com/webrtc-broadcasting/broadcast.js"> </script>
+     <style>
         	body{
         		margin-top: 30px;
         	}
         	#messageArea{
         		display: none;
         	}
+            #videoArea{
+                display: none;
+            }
         </style>
-	</head>
-	<body>
-		<div class="container">
-			<div id="userFormArea" class="row">
-				<div class="col-md-12">
-					<form id="userForm">
-						<div class="form-group">
-							<label>Enter Username</label>
-							<input type="text" class="form-control" id="username" name="username"/>
-							<br/>
-							<input type="submit" class="btn btn-primary" value="Login"/>
-						</div>
-					</form>
-				</div>
-			</div>
-			<div id="messageArea" class="row">
-				<div class="col-md-4">
-					<div class="well">
-						<h3>Online Users</h3>
-						<ul class="list-group" id="users"></ul>
-					</div>
-				</div><br>
+</head>
+<body>
+    <article class="container">
 
-				<div class="col-md-4">
-					<div class="chat" id="chat"></div>
-					<form id="messageForm">
-						<div class="form-group">
-							<label>Enter Message</label><br>
-							<textarea rows="4" cols="100" id="message"></textarea><br><br>
-							<input type="submit" class="btn btn-primary" value="SendMessage"/>
-						</div>
-					</form>
-				</div>
-
-				<!--HEREHERE FOR *TOSTREAM*  -->
-				<div id="startV" class="col-md-8">
-					<video id="video1" playsinline autoplay></video>
-					<video id="video2"playsinline autoplay></video>
-					<video id="video3" playsinline autoplay></video>
-					<!-- <canvas id="preview"></canvas> -->
-					<button id="start">Start</button>
-					<button id="call">CALL</button>
-					<button id="hang">Hang</button>
-				</div>
-<!-- 				
-				<br><p>here</p>
-				<button id="show">SHOW</button>
-				<p>here</p> -->
-
-				<!-- HEREHERE FOR *RECIEVESTREAM* -->
-				<!-- <div id="showV" class="col-md-8">
-					
-					<video id="video4" playsinline autoplay></video>
-					<image></image>
-					<button id="hang">Hang</button>
-				</div> -->
-
-			</div>
-		</div>
+            <div id="userFormArea" class="row">
+                    <div class="col-md-12">
+                        <form id="userForm">
+                            <div class="form-group">
+                                <label>Enter Username</label>
+                                <input type="text" class="form-control" id="username" name="username"/>
+                                <br/>
+                                <input type="submit" class="btn btn-primary" value="Login"/>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
 
 
-		<script>
-
-			// var canvas = document.getElementById('preview');
-			// var context = canvas.getContext('2d');
-			// canvas.width = 800;
-			// canvas.height = 600;
-			// context.width = canvas.width;
-			// context.height = canvas.height;
-
-
-			$(function(){
-
-				const startb = document.getElementById('start');
-				const callb = document.getElementById('call');
-				const hangupb = document.getElementById('hang');
-				callb.disabled = true;
-				hangupb.disabled = true;
-				// startb.onclick = start;
-				// callb.onclick = call;
-				// hangup.onclick = hangup;
-
-				const video1 = document.querySelector('video#video1');
-				const video2 = document.querySelector('video#video2');
-								
-				let pc1Local;
-				let pc1Remote;
-				let pc2Local;
-				let pc2Remote;
-				const offerOptions = {
-				offerToReceiveAudio: 1,
-				offerToReceiveVideo: 1
-				};
-
-				function gotStream(stream) {
- 					console.log('Received local stream');
- 					video1.srcObject = stream;
-					  window.localStream = stream;
-						callb.disabled =false;
-						// context.drawImage(video,0,0,context.width,context.height);
-      		// socket.emit('stream',canvas.toDataURL());	
-				
-				}
-
-				function start() {
-					console.log('Requesting local stream');
-					startb.disabled = true;
-					navigator.mediaDevices
-						.getUserMedia({
-						audio: false,
-						video: true
-						})
-						.then(gotStream)
-						.catch(e => console.log('getUserMedia() error: ', e));
-				}
-
-				function call() {
-					callb.disabled = true;
-					hangupb.disabled = false;
-					console.log('Starting calls');
-					// const audioTracks = window.localStream.getAudioTracks();
-					const videoTracks = window.localStream.getVideoTracks();
-					// if (audioTracks.length > 0) {
-						// console.log(`Using audio device: ${audioTracks[0].label}`);
-					// }
-					if (videoTracks.length > 0) {
-						console.log(`Using video device: ${videoTracks[0].label}`);
-					}
-					// Create an RTCPeerConnection via the polyfill.
-					const servers = null;
-					pc1Local = new RTCPeerConnection(servers);
-					pc1Remote = new RTCPeerConnection(servers);
-					pc1Remote.ontrack = gotRemoteStream1;
-					pc1Local.onicecandidate = iceCallback1Local;
-					pc1Remote.onicecandidate = iceCallback1Remote;
-					console.log('pc1: created local and remote peer connection objects');
-
-					pc2Local = new RTCPeerConnection(servers);
-					pc2Remote = new RTCPeerConnection(servers);
-					pc2Remote.ontrack = gotRemoteStream2;
-					pc2Local.onicecandidate = iceCallback2Local;
-					pc2Remote.onicecandidate = iceCallback2Remote;
-					console.log('pc2: created local and remote peer connection objects');
-
-					window.localStream.getTracks().forEach(track => pc1Local.addTrack(track, window.localStream));
-					console.log('Adding local stream to pc1Local');
-					pc1Local
-						.createOffer(offerOptions)
-						.then(gotDescription1Local, onCreateSessionDescriptionError);
-
-					window.localStream.getTracks().forEach(track => pc2Local.addTrack(track, window.localStream));
-					console.log('Adding local stream to pc2Local');
-					pc2Local.createOffer(offerOptions)
-						.then(gotDescription2Local, onCreateSessionDescriptionError);
-					// FOR STREAMING DATAA!!!!!!???????????????????????????????????????????
-						// context.drawImage(video,0,0,context.width,context.height);
-      		// socket.emit('stream',canvas.toDataURL());					
-					}
-
-function onCreateSessionDescriptionError(error) {
-  						console.log(`Failed to create session description: ${error.toString()}`);
-					}
-
-function gotDescription1Local(desc) {
-  pc1Local.setLocalDescription(desc);
-  console.log(`Offer from pc1Local\n${desc.sdp}`);
-  pc1Remote.setRemoteDescription(desc);
-  pc1Remote.createAnswer().then(gotDescription1Remote, onCreateSessionDescriptionError);
-}
-
-function gotDescription1Remote(desc) {
-  pc1Remote.setLocalDescription(desc);
-  console.log(`Answer from pc1Remote\n${desc.sdp}`);
-  pc1Local.setRemoteDescription(desc);
-}
-
-function gotDescription2Local(desc) {
-  pc2Local.setLocalDescription(desc);
-  console.log(`Offer from pc2Local\n${desc.sdp}`);
-  pc2Remote.setRemoteDescription(desc);
-  pc2Remote.createAnswer().then(gotDescription2Remote, onCreateSessionDescriptionError);
-}
-
-function gotDescription2Remote(desc) {
-  pc2Remote.setLocalDescription(desc);
-  console.log(`Answer from pc2Remote\n${desc.sdp}`);
-  pc2Local.setRemoteDescription(desc);
-}
-
-function hangup() {
-  console.log('Ending calls');
-  pc1Local.close();
-  pc1Remote.close();
-  pc2Local.close();
-  pc2Remote.close();
-  pc1Local = pc1Remote = null;
-  pc2Local = pc2Remote = null;
-  hangupb.disabled = true;
-  callb.disabled = false;
-}
-
-function gotRemoteStream1(e) {
-  if (video2.srcObject !== e.streams[0]) {
-    video2.srcObject = e.streams[0];
-    console.log('pc1: received remote stream');
-  }
-}
-
-function gotRemoteStream2(e) {
-  if (video3.srcObject !== e.streams[0]) {
-    video3.srcObject = e.streams[0];
-    console.log('pc2: received remote stream');
-  }
-}
-
-function iceCallback1Local(event) {
-  handleCandidate(event.candidate, pc1Remote, 'pc1: ', 'local');
-}
-
-function iceCallback1Remote(event) {
-  handleCandidate(event.candidate, pc1Local, 'pc1: ', 'remote');
-}
-
-function iceCallback2Local(event) {
-  handleCandidate(event.candidate, pc2Remote, 'pc2: ', 'local');
-}
-
-function iceCallback2Remote(event) {
-  handleCandidate(event.candidate, pc2Local, 'pc2: ', 'remote');
-}
-
-function handleCandidate(candidate, dest, prefix, type) {
-  dest.addIceCandidate(candidate)
-    .then(onAddIceCandidateSuccess, onAddIceCandidateError);
-  console.log(`${prefix}New ${type} ICE candidate: ${candidate ? candidate.candidate : '(null)'}`);
-}
-
-function onAddIceCandidateSuccess() {
-  console.log('AddIceCandidate success.');
-}
-
-function onAddIceCandidateError(error) {
-  console.log(`Failed to add ICE candidate: ${error.toString()}`);
-}
+            <div id="messageArea" class="row">
+                    <div class="col-md-4">
+                        <div class="well">
+                            <h3>Online Users</h3>
+                            <ul class="list-group" id="users"></ul>
+                        </div>
+                    </div><br>
+    
+                    <div class="col-md-4">
+                        <div class="chat" id="chat"></div>
+                        <form id="messageForm">
+                            <div class="form-group">
+                                <label>Enter Message</label><br>
+                                <textarea rows="4" cols="100" id="message"></textarea><br><br>
+                                <input type="submit" class="btn btn-primary" value="SendMessage"/>
+                            </div>
+                        </form>
+           
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-8">
+                            <section class="experiment">
+                                    <section id="videoArea" id="showing">
+                                        <input type="hidden" id="broadcast-name">
+                                        <button id="setup-new-broadcast" class="setup">Setup New Broadcast</button>
+                                    </section>
+                    
+                                    <!-- list of all available broadcasting rooms -->
+                                    <table style="width: 100%;" id="rooms-list"></table>
+                    
+                                    <!-- local/remote videos container -->
+                                    <div id="videos-container"></div>
+                                </section>     
+                    </div>
+                </div>
 
 
-
-			var socket = io.connect();
+       
+            <script>
+                $(function(){
 			var $messageForm = $('#messageForm');
 			var $message =$('#message');
 			var $chat = $('#chat');
@@ -270,31 +102,57 @@ function onAddIceCandidateError(error) {
 			var $userFormArea = $('#userFormArea');
 			var $userForm = $('#userForm');
 			var $users = $('#users');
-			var $username = $('#username');
-			var $showV = $('#showV');
-
-
+            var $username = $('#username');
+            var $videoArea = $('#videoArea');
+            var $show = $('#showing');
+            // console.log('can y see');
+                        // console.log($username.val());
+                        // console.log('thissss');
 			$messageForm.submit(function(e){
-				e.preventDefault();
+                e.preventDefault();
+                console.log($message.val());
 				socket.emit('send message',$message.val());
-				$message.val();
+				$message.val('');
 			});
 
 			socket.on('new message',function(data){
+                console.log("here?????????????????????????/");
+                console.log(data);
 				$chat.append('<div class="well"><strong>'+data.user+'</strong>:'+data.msg+'</div>');
 			});
 			$userForm.submit(function(e){
 				e.preventDefault();
 				socket.emit('new user',$username.val(),function(data){
+                    console.log(data);
 					if(data){
 						$userFormArea.hide();
-						$messageArea.show();
-						$showV.hide();
+                        $messageArea.show();
+                        console.log(data)
+                        if(data === 'admin'){
+                        $videoArea.show();
+                        console.log('ifhere>');
+                        }
+                        else{
+                            $videoArea.hide();
+                            console.log('else here>');
+                        }
+                        console.log("to");
+                        console.log(data);
+                        console.log('herre!r')
+                        console.log($username);
+                        console.log($username.val());
 					}
 				});
 				$username.val('');
 			});
 			socket.on('get users', function(data){
+                console.log(data);
+                console.log('ffrom');
+                // if(data != 'admin'){
+                //     $show.hide();
+                // }else{
+                //     $show.show();
+                // }
 				var html = '';
 				console.log(data);
 				for(i=0;i<data.length;i++){
@@ -304,35 +162,143 @@ function onAddIceCandidateError(error) {
 			});
 
 
-			
-			
-			// vary with admin or users! ----show hide show hide working
+                });
+                var config = {
+                    openSocket: function(config) {
+                        // why two? keep the localhost here??
+                        var SIGNALING_SERVER = 'https://socketio-over-nodejs2.herokuapp.com:443/';
+                        var SIGNALING_SERVER = 'https://webrtcweb.com:9559/';
+                        config.channel = config.channel || location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
+                        var sender = 'admin';// Math.round(Math.random() * 999999999) + 999999999;
+                        console.log(SIGNALING_SERVER);
+                        console.log(sender);
+                        console.log(config.channel);
+                        console.log('c1');
+                        io.connect(SIGNALING_SERVER).emit('new-channel', {
+                            channel: config.channel,
+                            sender: sender
+                        });
 
-				// $('#show').click(function(){
-				// 	console.log('click working');
-				// 	$showV.show();
-				// 	socket.on('stream',function(image){
-				// 		console.log('hey?');
-				// 		console.log(image);
-				// 		$('#video4').srcObject= stream;
-				// 		// $('#video4').attr('src',)
-				// 	});
+                        var socket = io.connect(SIGNALING_SERVER + config.channel);
+                        socket.channel = config.channel;
+                        socket.on('connect', function () {
+                            if (config.callback) config.callback(socket);
+                        });
 
-				// });
+                        socket.send = function (message) {
+                            socket.emit('message', {
+                                sender: sender,
+                                data: message
+                            });
+                        };
 
-				$('#start').click(function(){
-					start();
-				});
+                        socket.on('message', config.onmessage);
+                    },
+                    onRemoteStream: function(htmlElement) {
+                        videosContainer.appendChild(htmlElement);
+                    },
+                    onRoomFound: function(room) {
+                        var alreadyExist = document.querySelector('button[data-broadcaster="' + room.broadcaster + '"]');
+                        if (alreadyExist) return;
 
-				$('#hang').click(function(){
-					hangup();
-				})
-				$('#call').click(function(){
-					call();
-					});
-			
-	});
-		</script>
+                        if (typeof roomsList === 'undefined') roomsList = document.body;
 
-	</body>
+                        var tr = document.createElement('tr');
+                        tr.innerHTML = '<td><strong>' + room.roomName + '</strong> is broadcasting his media!</td>' +
+                            '<td><button class="join">Join</button></td>';
+                        roomsList.appendChild(tr);
+
+                        var joinRoomButton = tr.querySelector('.join');
+                        joinRoomButton.setAttribute('data-broadcaster', room.broadcaster);
+                        joinRoomButton.setAttribute('data-roomToken', room.broadcaster);
+                        joinRoomButton.onclick = function() {
+                            this.disabled = true;
+
+                            var broadcaster = this.getAttribute('data-broadcaster');
+                            var roomToken = this.getAttribute('data-roomToken');
+                            broadcastUI.joinRoom({
+                                roomToken: roomToken,
+                                joinUser: broadcaster
+                            });
+                        };
+                    },
+                    onNewParticipant: function(numberOfViewers) {
+                        document.title = 'Viewers: ' + numberOfViewers;
+                    },
+                    onReady: function() {
+                        console.log('now you can open or join rooms');
+                    }
+                };
+
+                function setupNewBroadcastButtonClickHandler() {
+                    document.getElementById('broadcast-name').disabled = true;
+                    document.getElementById('setup-new-broadcast').disabled = true;
+
+                    DetectRTC.load(function() {
+                        captureUserMedia(function() {
+                            var shared = 'video';
+                            broadcastUI.createRoom({
+                                roomName: 'admin' //(document.getElementById('broadcast-name') || { }).value || 'Anonymous',
+                            });
+                        });
+                    });
+                }
+
+                function captureUserMedia(callback) {
+                    var constraints = null;
+                    window.option = broadcastingOption ? broadcastingOption.value : '';
+
+                    if (DetectRTC.hasWebcam !== true) {
+                        alert('DetectRTC library is unable to find webcam; maybe you denied webcam access once and it is still denied or maybe webcam device is not attached to your system or another app is using same webcam.');
+                    }
+
+                    var htmlElement = document.createElement('video');
+
+                    htmlElement.muted = true;
+                    htmlElement.volume = 0;
+
+                    try {
+                        htmlElement.setAttributeNode(document.createAttribute('autoplay'));
+                        htmlElement.setAttributeNode(document.createAttribute('playsinline'));
+                        htmlElement.setAttributeNode(document.createAttribute('controls'));
+                    } catch (e) {
+                        htmlElement.setAttribute('autoplay', true);
+                        htmlElement.setAttribute('playsinline', true);
+                        htmlElement.setAttribute('controls', true);
+                    }
+
+                    var mediaConfig = {
+                        video: htmlElement,
+                        onsuccess: function(stream) {
+                            config.attachStream = stream;
+                            
+                            videosContainer.appendChild(htmlElement);
+                            
+                            callback && callback();
+                        },
+                        onerror: function() {
+                            alert('unable to get access to your webcam');
+                        }
+                    };
+                    if (constraints) mediaConfig.constraints = constraints;
+                    getUserMedia(mediaConfig);
+                }
+
+                var broadcastUI = broadcast(config);
+
+                /* UI specific */
+                var videosContainer = document.getElementById('videos-container') || document.body;
+                var setupNewBroadcast = document.getElementById('setup-new-broadcast');
+                var roomsList = document.getElementById('rooms-list');
+
+                var broadcastingOption = document.getElementById('broadcasting-option');
+
+                if (setupNewBroadcast) setupNewBroadcast.onclick = setupNewBroadcastButtonClickHandler;
+
+            
+            </script>
+
+
+    </article>
+</body>
 </html>
