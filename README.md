@@ -18,8 +18,9 @@ HOW IT WORKS:
 ==  
 
 In this real time application, if admin logged in then he can broadcast video. And the users logged in can watch the broadcasted media. Chat messages can be sent even when the video is being broadcasted.
+
 ----------------------------------------------------------------------------------------------------------------------------
-<p align="center"><img s2c="https://github.com/thegirlnotknownn/Task-26-12-18-/blob/master/static/1.png"></p>
+<p align="center"><img src="https://github.com/thegirlnotknownn/Task-26-12-18-/blob/master/static/1.png"></p>
 ----------------------------------------------------------------------------------------------------------------------------
 <p align="center"><img src="https://github.com/thegirlnotknownn/Task-26-12-18-/blob/master/static/2.png"></p>
 ----------------------------------------------------------------------------------------------------------------------------
