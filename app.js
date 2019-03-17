@@ -1,4 +1,3 @@
-
 var express = require('express');
 var app = express();
 var server = require('http').createServer(app);
@@ -28,12 +27,6 @@ console.log('Mongodb Connected');
 io.sockets.on('connection',function(socket){
 
 	var chat = db.collection('chats');
-
-// SEE IN HTML FILE AS WELL
-	// sendStatus =function(s){
-	// 	socket.emit('status',s);
-	// }
-
 	
 	socket.on('stream',function(image){
 		socket.broadcast.emit('stream',image);

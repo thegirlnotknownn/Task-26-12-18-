@@ -116,8 +116,8 @@
 			});
 
 			socket.on('new message',function(data){
-                console.log("here?????????????????????????/");
-                console.log(data);
+                // console.log("here?????????????????????????/");
+                // console.log(data);
 				$chat.append('<div class="well"><strong>'+data.user+'</strong>:'+data.msg+'</div>');
 			});
 			$userForm.submit(function(e){
@@ -136,25 +136,19 @@
                             $videoArea.hide();
                             console.log('else here>');
                         }
-                        console.log("to");
-                        console.log(data);
-                        console.log('herre!r')
-                        console.log($username);
-                        console.log($username.val());
+                        // console.log("to");
+                        // console.log(data);
+                        // console.log('herre!r')
+                        // console.log($username);
+                        // console.log($username.val());
 					}
 				});
 				$username.val('');
 			});
 			socket.on('get users', function(data){
-                console.log(data);
-                console.log('ffrom');
-                // if(data != 'admin'){
-                //     $show.hide();
-                // }else{
-                //     $show.show();
-                // }
+                // console.log(data);
 				var html = '';
-				console.log(data);
+				// console.log(data);
 				for(i=0;i<data.length;i++){
 					html +='<li class="list-group-item">'+data[i]+'</li>';
 				}
@@ -165,7 +159,6 @@
                 });
                 var config = {
                     openSocket: function(config) {
-                        // why two? keep the localhost here??
                         var SIGNALING_SERVER = 'https://socketio-over-nodejs2.herokuapp.com:443/';
                         var SIGNALING_SERVER = 'https://webrtcweb.com:9559/';
                         config.channel = config.channel || location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
@@ -178,8 +171,7 @@
                             channel: config.channel,
                             sender: sender
                         });
-
-                        var socket = io.connect(SIGNALING_SERVER + config.channel);
+                        var socket =io.connect('http://192.168.43.246');
                         socket.channel = config.channel;
                         socket.on('connect', function () {
                             if (config.callback) config.callback(socket);
@@ -238,7 +230,7 @@
                         captureUserMedia(function() {
                             var shared = 'video';
                             broadcastUI.createRoom({
-                                roomName: 'admin' //(document.getElementById('broadcast-name') || { }).value || 'Anonymous',
+                                roomName: 'admin' 
                             });
                         });
                     });
